@@ -1,20 +1,48 @@
-import { useCreateMyRestaurant, useGetMyRestaurant, useUpdateMyRestaurant } from '@/api/MyRestaurantApi';
-import ManageRestaurantForm from '@/forms/manage-restaurant-form/ManageRestaurantForm'
+import {
+  useCreateMyRestaurant,
+  useGetMyRestaurant,
+  useGetMyRestaurantOrders,
+  useUpdateMyRestaurant,
+} from "@/api/MyRestaurantApi";
+import OrderItemCard from "@/components/OrderItemCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ManageRestaurantForm from "@/forms/manage-restaurant-form/ManageRestaurantForm";
 
 const ManageRestaurantPage = () => {
-  const { createRestaurant, isLoading: isCreteLoading } = useCreateMyRestaurant();
+  const { createRestaurant, isLoading: isCreteLoading } =
+    useCreateMyRestaurant();
   const { restaurant } = useGetMyRestaurant();
-  const { updateRestaurant, isLoading: isUpdateLoading } = useUpdateMyRestaurant();
+  const { updateRestaurant, isLoading: isUpdateLoading } =
+    useUpdateMyRestaurant();
+
+  const { orders } = useGetMyRestaurantOrders();
 
   const isEditing = !!restaurant; // !! converts to boolean isEditing will be true if restaurant is exist and false if not
 
   return (
-    <ManageRestaurantForm 
-      restaurant={restaurant} 
-      onSave={isEditing ? updateRestaurant : createRestaurant} // if editing true then updateRestaurant else createRestaurant
-      isLoading={isCreteLoading || isUpdateLoading} 
-    />
-  )
-}
+    <Tabs>
+      <TabsList defaultValue="orders">
+        <TabsTrigger value="orders">Orders</TabsTrigger>
+        <TabsTrigger value="manage-restaurant">Manage Restaurant</TabsTrigger>
+      </TabsList>
+      <TabsContent
+        value="orders"
+        className="space-y-5 bg-gray-50 pg-10 rounded-lg"
+      >
+        <h2 className="text-2xl font-bold">{orders?.length} active orders</h2>
+        {orders?.map((order, index) => (
+          <OrderItemCard key={index} order={order} />
+        ))}
+      </TabsContent>
+      <TabsContent value="manage-restaurant">
+        <ManageRestaurantForm
+          restaurant={restaurant}
+          onSave={isEditing ? updateRestaurant : createRestaurant} // if editing true then updateRestaurant else createRestaurant
+          isLoading={isCreteLoading || isUpdateLoading}
+        />
+      </TabsContent>
+    </Tabs>
+  );
+};
 
 export default ManageRestaurantPage;
